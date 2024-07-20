@@ -1447,8 +1447,7 @@
 					save.work /= nerf
 					save.totalNerf *= nerf
 				}
-			}
-			endTime.value += diff
+			} else endTime.value += diff
 		}
 		setTimeout(loop, 20)
 	}
