@@ -2079,7 +2079,9 @@
 		<button @click="saveData.importSave = true">Import</button>
 		<button @click="loadModal">Import from File</button>
 		<button @click="saveData.hardReset = true">Wipe Save</button>
-		<button @click="paused = !paused">{{ paused ? "Unpause" : "Pause" }} the game (or press "p")</button>
+		<button @click="paused = !paused">{{ paused ? "Unpause" : "Pause" }} the game (or press "p")</button><br />
+		<div class="big">Jail Evasion Incremental</div>
+		A game made for the <a href="https://itch.io/jam/sigj-2024">Summer Incremental Game Jam 2024</a>.
 		`
 	}
 
