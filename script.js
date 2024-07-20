@@ -258,7 +258,7 @@
 				}
 			},
 			finish: () => {
-				const base = (save.upgrades[35] + 1) * selfBoost.value / 10
+				const base = UPGRADES[35].eff.value * selfBoost.value / 10
 				const cash = random(base, 2 * base)
 				messages.push(`You got $${format(cash, 2)}.`)
 				save.cash += cash
@@ -284,7 +284,7 @@
 				}
 			},
 			finish: () => {
-				const base = (save.upgrades[34] + 1) * selfBoost.value * Math.pow(1.2, save.upgrades[40])
+				const base = UPGRADES[34].eff.value * selfBoost.value * UPGRADES[40].eff.value
 				const junk = random(base, 2 * base)
 				if (junk === 0) messages.push("You didn't find anything")
 				else messages.push(`You found ${format(junk, 2)} junk.`)
@@ -602,12 +602,12 @@
 			cost: {
 				cash: computed(() => {
 					let workers = save.upgrades[14]
-					const eff = 1 - save.upgrades[17] * 0.05
+					const eff = 1 - UPGRADES[17].eff.value
 					return Math.pow(1.15, eff * workers) * 10000
 				}),
 				xp: computed(() => {
 					let workers = save.upgrades[14]
-					const eff = 1 - save.upgrades[17] * 0.05
+					const eff = 1 - UPGRADES[17].eff.value
 					return Math.pow(1.2, eff * workers) * 2000
 				})
 			},
@@ -615,7 +615,10 @@
 		{
 			corp: true,
 			name: "Productivity",
-			desc: "All workers produce 20% more.",
+			desc: "Workers produce more.",
+			effects: {
+				good: ["+15% to worker production"]
+			},
 			show: computed(() => true),
 			max: Infinity,
 			cost: {
@@ -625,19 +628,26 @@
 				xp: computed(() => {
 					return 5e4 * Math.pow(2.5, save.upgrades[16])
 				})
-			}
+			},
+			eff: computed(() => Math.pow(1.15, save.upgrades[16])),
+			effDesc: x => formatMult(x)
 		},
 		{
 			corp: true,
 			name: "Cheapism",
-			desc: "The cost for workers scales 5% slower.",
+			desc: "The cost for workers scales slower.",
+			effects: {
+				good: ["-5% to worker scaling"],
+			},
 			show: computed(() => true),
 			max: 4,
 			cost: {
 				cash: computed(() => {
 					return 1e5 * Math.pow(5, save.upgrades[17])
 				}),
-			}
+			},
+			eff: computed(() => 0.05 * save.upgrades[17]),
+			effDesc: x => `-${format(x * 100, 0)}%`
 		}, , , ,
 		{
 			name: "Escape",
@@ -664,6 +674,9 @@
 			desc: "Get one of your lawyers to try to come up with a strategy.",
 			show: computed(() => save.upgrades[23] >= 1),
 			max: Infinity,
+			effects: {
+				good: ["+1 attempt/sec"]
+			},
 			cost: {
 				strategies: computed(() => 2 * Math.pow(save.upgrades[24] + 1, 0.8) * Math.pow(1.3, save.upgrades[24]))
 			},
@@ -673,37 +686,55 @@
 		{
 			lawyer: true,
 			name: "Complexity",
-			desc: "Make more complicated strategies by increasing the max Strategy size by 1.",
+			desc: "Make more complicated strategies by increasing the max Strategy size.",
 			show: computed(() => save.upgrades[23] >= 1),
 			max: Infinity,
+			effects: {
+				good: ["+1 max Strategy size"]
+			},
 			cost: {
 				work: computed(() => YEAR * 1e6 * Math.pow(40, save.upgrades[25]))
-			}
+			},
+			eff: computed(() => save.upgrades[25]),
+			effDesc: x => `+${format(x, 0)}`
 		},
 		{
 			lawyer: true,
 			name: "Efficency",
-			desc: "Use the work created to make auto-attempts 15% faster.",
+			desc: "Use the work created to make auto-attempts faster.",
 			show: computed(() => save.upgrades[23] >= 1),
+			effects: {
+				good: ["+15% to auto-attempt speed"]
+			},
 			max: Infinity,
 			cost: {
 				work: computed(() => YEAR * 1e4 * Math.pow(100, save.upgrades[26]))
-			}
+			},
+			eff: computed(() => Math.pow(1.15, save.upgrades[26])),
+			effDesc: x => formatMult(x)
 		},
 		{
 			lawyer: true,
 			name: "Speeeed",
-			desc: "Reduce the time required to reroll Strategies by 10%.",
+			desc: "Reduce the time required to reroll Strategies.",
 			show: computed(() => save.upgrades[23] >= 1),
 			max: Infinity,
+			effects: {
+				good: ["-10% to Strategy reroll time"]
+			},
 			cost: {
 				work: computed(() => YEAR * 1e3 * Math.pow(10, save.upgrades[27]))
-			}
+			},
+			eff: computed(() => Math.pow(0.9, save.upgrades[27])),
+			effDesc: x => formatMult(x)
 		}, , , , , ,
 		{
 			name: "Candy bars",
 			desc: "Buy a candy bar from the prison shop.",
 			max: Infinity,
+			effects: {
+				good: ["+20 Total Energy"]
+			},
 			cost: {
 				cash: computed(() => 0.2 * Math.pow(2, Math.floor(save.upgrades[33] / 10)))
 			},
@@ -713,19 +744,29 @@
 			name: "Shovel",
 			desc: "Buy a shovel to help you find more junk.",
 			max: Infinity,
+			effects: {
+				good: ["+" + formatMult(1, 0) + " to junk gain"]
+			},
 			show: computed(() => save.state >= 2 && save.state <= 5),
 			cost: {
 				cash: computed(() => 0.5 + 0.1 * Math.pow(save.upgrades[34], 2))
-			}
+			},
+			eff: computed(() => save.upgrades[34] + 1),
+			effDesc: x => formatMult(x)
 		},
 		{
 			name: "Toolmaking",
 			desc: "Make some tools using junk, which should help improve your Work quality.",
+			effects: {
+				good: ["+" + formatMult(1, 0) + " to Work cash gain"]
+			},
 			max: Infinity,
 			show: computed(() => save.state >= 2 && save.state <= 5),
 			cost: {
 				junk: computed(() => 10 + 2 * Math.pow(save.upgrades[35], 2))
-			}
+			},
+			eff: computed(() => save.upgrades[35] + 1),
+			effDesc: x => formatMult(x)
 		},
 		{
 			research: true,
@@ -740,7 +781,9 @@
 			show: computed(() => true),
 			cost: {
 				junk: computed(() => 40 * Math.pow(1.5, save.upgrades[36])),
-			}
+			},
+			eff: computed(() => Math.pow(1.1, save.upgrades[36])),
+			effDesc: x => formatMult(x)
 		},
 		{
 			research: true,
@@ -755,7 +798,9 @@
 			show: computed(() => true),
 			cost: {
 				cash: computed(() => Math.pow(4, save.upgrades[37])),
-			}
+			},
+			eff: computed(() => Math.pow(1.15, save.upgrades[37])),
+			effDesc: x => formatMult(x)
 		}, ,
 		{
 			name: "Bribery",
@@ -767,7 +812,9 @@
 			show: computed(() => save.state >= 7),
 			cost: {
 				cash: computed(() => 100 * Math.pow(8, save.upgrades[39]))
-			}
+			},
+			eff: computed(() => Math.pow(2, save.upgrades[39])),
+			effDesc: x => `/${format(x)}`
 		},
 		{
 			research: true,
@@ -781,7 +828,9 @@
 			cost: {
 				experience: computed(() => 3 * Math.pow(10, save.upgrades[40])),
 				junk: computed(() => 50 * Math.pow(4, save.upgrades[40]))
-			}
+			},
+			eff: computed(() => Math.pow(1.2, save.upgrades[40])),
+			effDesc: x => `/${format(x)}`
 		},
 		{
 			research: true,
@@ -794,7 +843,9 @@
 			show: computed(() => save.resetTimes > 0),
 			cost: {
 				xp: computed(() => 500 * Math.pow(7, save.upgrades[41])),
-			}
+			},
+			eff: computed(() => Math.pow(2, save.upgrades[41])),
+			effDesc: x => formatMult(x)
 		},
 		{
 			name: "Learning",
@@ -806,7 +857,9 @@
 			show: computed(() => save.state >= 7),
 			cost: {
 				xp: computed(() => 100 * Math.pow(4, save.upgrades[42])),
-			}
+			},
+			eff: computed(() => Math.pow(1.25, save.upgrades[42])),
+			effDesc: x => formatMult(x)
 		},
 		{
 			research: true,
@@ -822,47 +875,68 @@
 		{
 			corp: true,
 			name: "Multiplicative",
-			desc: "Each worker gives +1% to worker production per level of this upgrade.",
+			desc: "Workers multiply worker production!",
 			show: computed(() => true),
+			effects: {
+				good: ["+1% to Worker production for each Worker"]
+			},
 			max: 2,
 			cost: {
 				xp: computed(() => 1e6 * Math.pow(10, save.upgrades[44])),
-			}
+			},
+			eff: computed(() => 0.01 * save.upgrades[44]),
+			effDesc: x => `+${format(100 * x, 0)}%`
 		},
 		{
 			research: true,
 			name: "Productivity^2",
-			desc: "Entice workers to be 15% more productive, again.",
+			desc: "Workers produce more, again.",
 			show: computed(() => save.corporationUnlocked),
+			effects: {
+				good: ["+15% to Worker production"]
+			},
 			max: Infinity,
 			cost: {
 				junk: computed(() => 1000 * Math.pow(3, save.upgrades[45])),
 				xp: computed(() => 50000 * Math.pow(3, save.upgrades[45])),
 				experience: computed(() => 10000 * Math.pow(2, save.upgrades[45]))
-			}
+			},
+			eff: computed(() => Math.pow(1.15, save.upgrades[45])),
+			effDesc: x => formatMult(x)
 		},
 		{
 			research: true,
 			name: "Energized",
-			desc: "Increase the Energy cap by 40.",
+			desc: "Increase the Energy cap.",
 			show: computed(() => save.corporationUnlocked),
+			effects: {
+				good: ["+40 to Energy cap"]
+			},
 			max: 5,
 			cost: {
 				cash: computed(() => 1e5 * Math.pow(3, save.upgrades[46]))
-			}
+			},
+			eff: computed(() => 40 * save.upgrades[46]),
+			effDesc: x => `+${format(x, 0)}`
 		},
 		{
 			research: true,
 			name: "Work Experience",
-			desc: "Use your experience to triple work gain.",
+			desc: "Use your experience to get even MORE work.",
 			show: computed(() => save.lawyersUnlocked),
 			max: Infinity,
 			cost: {
 				cash: computed(() => 1e8 * Math.pow(5, save.upgrades[47])),
 				xp: computed(() => 1e7 * Math.pow(5, save.upgrades[47])),
 				experience: computed(() => 1e7 * Math.pow(4, save.upgrades[47]))
-			}
-		}, {
+			},
+			effects: {
+				good: ["3x to Work gain"]
+			},
+			eff: computed(() => Math.pow(3, save.upgrades[47])),
+			effDesc: x => formatMult(x)
+		}, 
+		{
 			research: true,
 			name: "Quality",
 			desc: "Increase the number of edges for Strategies.",
@@ -893,7 +967,9 @@
 			max: Infinity,
 			cost: {
 				work: computed(() => YEAR * 1e4 * Math.pow(100, save.upgrades[51]))
-			}
+			},
+			eff: computed(() => Math.pow(2, save.upgrades[51])),
+			effDesc: x => formatMult(x)
 		},
 		{
 			research: true,
@@ -930,7 +1006,7 @@
 		if (idx < LAWYER_TIERS.length - 1) multi *= 1 + save.lawyers[idx + 1].produced
 		if (idx === 0) {
 			multi /= save.totalNerf
-			multi *= Math.pow(3, save.upgrades[47])
+			multi *= UPGRADES[47].eff.value
 		}
 		multi /= idx + 1
 
@@ -949,19 +1025,19 @@
 
 	const strategyData = computed(() => {
 		let size = 5
-		size += save.upgrades[25]
+		size += UPGRADES[25].eff.value
 
 		return {
 			// the randomness is kinda bad
 			density: 0.8 + 0.2 * save.upgrades[48],
-			reroll: 5 * Math.pow(0.9, save.upgrades[27]),
+			reroll: 5 * UPGRADES[27].eff.value,
 			size
 		}
 	})
 
 	const autoAttempts = computed(() => {
 		let attempt = UPGRADES[24].eff.value
-		attempt *= Math.pow(1.15, save.upgrades[26])
+		attempt *= UPGRADES[26].eff.value
 		return attempt
 	})
 
@@ -970,7 +1046,7 @@
 		// It needs to be worth it to use bigger strategies, since the size scales quadratically
 		let base = Math.floor(Math.pow(size, 3) / 5 + Math.pow(size, 2) / 2 + size)
 		base *= trialEffects.value.buffLawyers
-		base *= Math.pow(2, save.upgrades[51])
+		base *= UPGRADES[51].eff.value
 		return base
 	})
 
@@ -1033,7 +1109,7 @@
 
 		// These formulas probably suck but who cares
 		return {
-			nerf: Math.sqrt(2 * time + 1),
+			nerf: time + 1,
 			buffLawyers: (evidence + 1) * Math.pow(1.1, Math.pow(evidence, 0.6)),
 			buffEvidence: Math.pow(log, 3) * Math.pow(evidence + 1, 1 / 3),
 			makeTime: 4 / Math.pow(log, 1.4),
@@ -1138,9 +1214,9 @@
 
 	const workerProds = computed(() => {
 		let bonus = 1
-		bonus *= Math.pow(1.15, save.upgrades[16])
-		bonus *= Math.pow(1.15, save.upgrades[45])
-		bonus *= Math.pow(1 + save.upgrades[44] * 0.01, save.upgrades[14])
+		bonus *= UPGRADES[16].eff.value
+		bonus *= UPGRADES[45].eff.value
+		bonus *= Math.pow(1 + UPGRADES[44].eff.value, save.upgrades[14])
 		bonus *= lawyerEffects.value.multi
 
 		return {
@@ -1151,7 +1227,7 @@
 
 	const selfBoost = computed(() => {
 		let boost = 1
-		boost *= Math.pow(1.15, save.upgrades[37])
+		boost *= UPGRADES[37].eff.value
 		if (save.upgrades[2] >= 1) boost *= 1.5
 		if (save.upgrades[12] >= 1) boost *= 2
 		return boost
@@ -1164,7 +1240,7 @@
 		gen *= d
 		gen *= Math.pow(2, Math.floor(d / 30))
 
-		gen /= Math.pow(2, save.upgrades[39])
+		gen /= UPGRADES[39].eff.value
 		gen *= unref(ACTIONS[selected.value]?.mods?.mult?.evasionPoints) ?? 1
 		gen /= UPGRADES[7].eff.value
 		gen *= cashPenalty.value
@@ -1189,7 +1265,7 @@
 
 	const energyCap = computed(() => {
 		let cap = 100
-		cap += 40 * save.upgrades[46]
+		cap += UPGRADES[46].eff.value
 		return cap
 	})
 
@@ -1199,7 +1275,7 @@
 		cash *= unref(ACTIONS[selected.value]?.mods?.mult?.cash) ?? 1
 		cash += save.upgrades[14] * workerProds.value.cash
 		cash *= selfBoost.value
-		cash *= Math.pow(1.25, save.upgrades[42])
+		cash *= UPGRADES[42].eff.value
 		return cash
 	})
 
@@ -1232,7 +1308,7 @@
 
 	const experienceGain = computed(() => {
 		let gain = Math.pow(save.totalCash, 0.6)
-		gain *= Math.pow(2, save.upgrades[41])
+		gain *= UPGRADES[41].eff.value
 		gain *= Math.sqrt(save.strategies)
 
 		return gain
@@ -1240,7 +1316,7 @@
 
 	const rawEnergy = computed(() => {
 		let base = save.meals * 100 + save.upgrades[33] * 20
-		base *= Math.pow(1.1, save.upgrades[36])
+		base *= UPGRADES[36].eff.value
 
 		// softcap beyond 2000 and 5000
 		if (base > 2000) base = 2000 + (base - 2000) / 5
@@ -1529,6 +1605,13 @@
 						"px",
 				};
 			});
+			
+			function setTrue() {
+				hovered.value = true
+			}
+			function setFalse() {
+				hovered.value = false
+			}
 
 			onMounted(() => {
 				interval = setInterval(() => {
@@ -1544,8 +1627,12 @@
 				const {
 					el
 				} = getCurrentInstance().subTree.children[0].children[0];
-				el.addEventListener("mouseenter", () => (hovered.value = true));
-				el.addEventListener("mouseleave", () => (hovered.value = false));
+				
+				el.addEventListener("mouseenter", setTrue);
+				el.addEventListener("touchstart", setTrue, { passive: true });
+				el.addEventListener("mouseleave", setFalse);
+				el.addEventListener("touchend", setFalse);
+				el.addEventListener("touchcancel", setFalse);
 				content.value = el;
 			});
 
