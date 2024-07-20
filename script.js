@@ -1309,7 +1309,7 @@
 	const experienceGain = computed(() => {
 		let gain = Math.pow(save.totalCash, 0.6)
 		gain *= UPGRADES[41].eff.value
-		gain *= Math.sqrt(save.strategies)
+		gain *= Math.sqrt(save.strategies + 1)
 
 		return gain
 	})
