@@ -226,226 +226,241 @@
 	}
 
 	const ACTIONS = [{
-		name: "Wake up",
-		desc: "Ughhhh that didn't feel good...",
-		flavorDesc: "What even is this place?",
-		time: 2,
-		show: computed(() => save.state === 0),
-		finish: () => {
-			save.state++
-			messages.push("You seem to be in a jail.")
-		}
-	}, {
-		name: "Rest",
-		desc: "Gain some energy and clear your head",
-		flavorDesc: "That felt better",
-		time: 5,
-		show: computed(() => save.state === 1),
-		finish: () => {
-			save.state++
-			save.energy = 100
-			messages.push("That felt better...")
-		}
-	}, {
-		name: "Work",
-		desc: "Work in the jail for some money, but use energy",
-		time: 3,
-		mods: {
-			sec: {
-				energy: -10,
+			name: "Wake up",
+			desc: "Ughhhh that didn't feel good...",
+			flavorDesc: "What even is this place?",
+			time: 2,
+			show: computed(() => save.state === 0),
+			finish: () => {
+				save.state++
+				messages.push("You seem to be in a jail.")
 			}
 		},
-		finish: () => {
-			const base = (save.upgrades[35] + 1) * selfBoost.value / 10
-			const cash = random(base, 2 * base)
-			messages.push(`You got $${format(cash, 2)}.`)
-			save.cash += cash
-		},
-		show: computed(() => save.state >= 2 && save.state <= 5),
-	}, {
-		name: "Eat",
-		desc: "Wait for prison guards to give you some food",
-		time: 3,
-		finish: () => {
-			save.meals++
-		},
-		show: computed(() => save.state >= 2 && save.state <= 5),
-	}, {
-		name: "Find junk",
-		desc: "Find some junk around here",
-		time: 3,
-		mods: {
-			sec: {
-				energy: -10
+		{
+			name: "Rest",
+			desc: "Gain some energy and clear your head",
+			flavorDesc: "That felt better",
+			time: 5,
+			show: computed(() => save.state === 1),
+			finish: () => {
+				save.state++
+				save.energy = 100
+				messages.push("That felt better...")
 			}
 		},
-		finish: () => {
-			const base = (save.upgrades[34] + 1) * selfBoost.value * Math.pow(1.2, save.upgrades[40])
-			const junk = random(base, 2 * base)
-			if (junk === 0) messages.push("You didn't find anything")
-			else messages.push(`You found ${format(junk, 2)} junk.`)
-			save.junk += junk
-		},
-		show: computed(() => save.state >= 2 && save.state <= 5),
-	}, {
-		name: "Rest",
-		desc: "Rest to gain energy, using up your Total Energy.",
-		time: 3,
-		finish: () => {
-			const spend = Math.min(rawEnergy.value - save.energySpent, energyCap.value - save.energy)
-			save.energy += spend
-			save.energySpent += spend
-		},
-		can: computed(() => save.energy < energyCap.value && save.energySpent < rawEnergy.value),
-		show: computed(() => save.state >= 2)
-	}, {
-		name: "Research",
-		desc: "Pernamently unlock Research.",
-		time: 5,
-		require: "$2 and 40 Junk (not spent)",
-		can: computed(() => save.cash >= 2 && save.junk >= 40),
-		show: computed(() => save.state >= 2 && !save.researchUnlocked),
-		finish: () => {
-			save.researchUnlocked = true
-		}
-	}, {
-		name: "Crowbar",
-		desc: "Make a crowbar out of junk.",
-		time: 5,
-		mods: {
-			sec: {
-				energy: -10
-			}
-		},
-		require: "100 Junk",
-		can: computed(() => save.junk >= 100),
-		show: computed(() => save.state === 2),
-		finish: () => {
-			save.state++
-			save.junk -= 100
-		}
-	}, {
-		name: "Destruction",
-		desc: "Create a big enough hole so that you can escape.",
-		time: 5,
-		mods: {
-			sec: {
-				energy: -10
-			}
-		},
-		show: computed(() => save.state === 3),
-		finish: () => {
-			messages.push("Somehow no one noticed...?")
-			save.state++
-		}
-	}, {
-		name: "Bribery",
-		desc: "Bribe one of your jail cell guards",
-		time: 5,
-		require: "$5",
-		show: computed(() => save.state === 4),
-		can: computed(() => save.cash >= 5),
-		finish: () => {
-			messages.push("You have no idea why that worked, but now you can escape!")
-			save.cash -= 5
-			save.state++
-		},
-	}, {
-		name: "Escape",
-		desc: "Run to the exit to escape. You might need energy for after the escape however...",
-		flavorDesc: "It's kind of tiring though",
-		time: 5,
-		show: computed(() => save.state === 5),
-		can: computed(() => rawEnergy.value - save.energySpent >= 1000),
-		require: "1000 free Total Energy",
-		mods: {
-			sec: {
-				energy: -20
-			}
-		},
-		finish: () => {
-			messages.push("The exit seems to be guarded by a pin pad...")
-			save.state++
-		}
-	}, {
-		name: "Escape",
-		desc: "Try to get the door open",
-		time: 30,
-		show: computed(() => save.state === 6),
-		start: () => {
-			if (save.puzzlesCompleted[0]) {
-				messages.push("The door is still weak from the time you tried to pry it open, meaning it wasn't too difficult getting out of there.")
-				solvePuzzle0()
-			} else {
-				puzzle0.attempted = true
-				puzzle0.pos = random(0, 0.75)
-				puzzle0.circle = 0
-			}
-		}
-	}, {
-		name: "Work",
-		desc: "Work and get money along with some experience",
-		time: 3,
-		mods: {
-			sec: {
-				energy: computed(() => {
-					let energy = -5
-					energy *= Math.pow(1.5, save.upgrades[1])
-					if (save.upgrades[12] >= 1) energy *= 3
-					return energy
-				}),
-				cash: computed(() => {
-					let cash = Math.pow(2, save.upgrades[1])
-					if (save.upgrades[12] >= 1) cash *= 3
-					return cash
-				}),
-				xp: computed(() => {
-					let xp = Math.pow(2, save.upgrades[1])
-					if (save.upgrades[12] >= 1) xp *= 3
-					return xp
-				}),
+		{
+			name: "Work",
+			desc: "Work in the jail for some money, but use energy",
+			time: 3,
+			mods: {
+				sec: {
+					energy: -10,
+				}
 			},
-			/*mult: {
-				evasionPoints: computed(() => 2 * Math.pow(1.5, save.upgrades[1]))
-			}*/
-		},
-		show: computed(() => save.state >= 7),
-	}, {
-		name: "Explore",
-		desc: "Look around for some opportunities.",
-		flavorDesc: "Might be risky though...",
-		time: 5,
-		mods: {
-			sec: {
-				energy: -10
+			finish: () => {
+				const base = (save.upgrades[35] + 1) * selfBoost.value / 10
+				const cash = random(base, 2 * base)
+				messages.push(`You got $${format(cash, 2)}.`)
+				save.cash += cash
 			},
-			mult: {
-				evasionPoints: 2,
+			show: computed(() => save.state >= 2 && save.state <= 5),
+		},
+		{
+			name: "Eat",
+			desc: "Wait for prison guards to give you some food",
+			time: 3,
+			finish: () => {
+				save.meals++
+			},
+			show: computed(() => save.state >= 2 && save.state <= 5),
+		},
+		{
+			name: "Find junk",
+			desc: "Find some junk around here",
+			time: 3,
+			mods: {
+				sec: {
+					energy: -10
+				}
+			},
+			finish: () => {
+				const base = (save.upgrades[34] + 1) * selfBoost.value * Math.pow(1.2, save.upgrades[40])
+				const junk = random(base, 2 * base)
+				if (junk === 0) messages.push("You didn't find anything")
+				else messages.push(`You found ${format(junk, 2)} junk.`)
+				save.junk += junk
+			},
+			show: computed(() => save.state >= 2 && save.state <= 5),
+		},
+		{
+			name: "Rest",
+			desc: "Rest to gain energy, using up your Total Energy.",
+			time: 3,
+			finish: () => {
+				const spend = Math.min(rawEnergy.value - save.energySpent, energyCap.value - save.energy)
+				save.energy += spend
+				save.energySpent += spend
+			},
+			can: computed(() => save.energy < energyCap.value && save.energySpent < rawEnergy.value),
+			show: computed(() => save.state >= 2)
+		},
+		{
+			name: "Research",
+			desc: "Pernamently unlock Research.",
+			time: 5,
+			require: "$2 and 40 Junk (not spent)",
+			can: computed(() => save.cash >= 2 && save.junk >= 40),
+			show: computed(() => save.state >= 2 && !save.researchUnlocked),
+			finish: () => {
+				save.researchUnlocked = true
 			}
 		},
-		require: "$300",
-		can: computed(() => save.cash >= 300),
-		show: computed(() => save.state === 7),
-		finish: () => {
-			save.state++
-			save.cash -= 300
-			messages.push("You found a bunch of stuff that you could buy, but you'll need some money...")
-		}
-	}, {
-		name: "Leave",
-		desc: "Leave for another country",
-		time: 90,
-		show: computed(() => save.upgrades[21] >= 1 && save.state === 8),
-		start: () => {
-			if (save.puzzlesCompleted[1]) {
-				messages.push("You remembered your PIN code this time.")
-				solvePuzzle1()
-			} else {
-				puzzle1.attempted = true
-				puzzle1.code = randomInt(1000, 9999)
+		{
+			name: "Crowbar",
+			desc: "Make a crowbar out of junk.",
+			time: 5,
+			mods: {
+				sec: {
+					energy: -10
+				}
+			},
+			require: "100 Junk",
+			can: computed(() => save.junk >= 100),
+			show: computed(() => save.state === 2),
+			finish: () => {
+				save.state++
+				save.junk -= 100
+			}
+		},
+		{
+			name: "Destruction",
+			desc: "Create a big enough hole so that you can escape.",
+			time: 5,
+			mods: {
+				sec: {
+					energy: -10
+				}
+			},
+			show: computed(() => save.state === 3),
+			finish: () => {
+				messages.push("Somehow no one noticed...?")
+				save.state++
+			}
+		},
+		{
+			name: "Bribery",
+			desc: "Bribe one of your jail cell guards",
+			time: 5,
+			require: "$5",
+			show: computed(() => save.state === 4),
+			can: computed(() => save.cash >= 5),
+			finish: () => {
+				messages.push("You have no idea why that worked, but now you can escape!")
+				save.cash -= 5
+				save.state++
+			},
+		},
+		{
+			name: "Escape",
+			desc: "Run to the exit to escape. You might need energy for after the escape however...",
+			flavorDesc: "It's kind of tiring though",
+			time: 5,
+			show: computed(() => save.state === 5),
+			can: computed(() => rawEnergy.value - save.energySpent >= 1000),
+			require: "1000 free Total Energy",
+			mods: {
+				sec: {
+					energy: -20
+				}
+			},
+			finish: () => {
+				messages.push("The exit seems to be guarded by a pin pad...")
+				save.state++
+			}
+		},
+		{
+			name: "Escape",
+			desc: "Try to get the door open",
+			time: 30,
+			show: computed(() => save.state === 6),
+			start: () => {
+				if (save.puzzlesCompleted[0]) {
+					messages.push("The door is still weak from the time you tried to pry it open, meaning it wasn't too difficult getting out of there.")
+					solvePuzzle0()
+				} else {
+					puzzle0.attempted = true
+					puzzle0.pos = random(0, 0.75)
+					puzzle0.circle = 0
+				}
+			}
+		},
+		{
+			name: "Work",
+			desc: "Work and get money along with some experience",
+			time: 3,
+			mods: {
+				sec: {
+					energy: computed(() => {
+						let energy = -5
+						energy *= Math.pow(1.5, save.upgrades[1])
+						if (save.upgrades[12] >= 1) energy *= 3
+						return energy
+					}),
+					cash: computed(() => {
+						let cash = Math.pow(2, save.upgrades[1])
+						if (save.upgrades[12] >= 1) cash *= 3
+						return cash
+					}),
+					xp: computed(() => {
+						let xp = Math.pow(2, save.upgrades[1])
+						if (save.upgrades[12] >= 1) xp *= 3
+						return xp
+					}),
+				},
+				/*mult: {
+					evasionPoints: computed(() => 2 * Math.pow(1.5, save.upgrades[1]))
+				}*/
+			},
+			show: computed(() => save.state >= 7),
+		},
+		{
+			name: "Explore",
+			desc: "Look around for some opportunities.",
+			flavorDesc: "Might be risky though...",
+			time: 5,
+			mods: {
+				sec: {
+					energy: -10
+				},
+				mult: {
+					evasionPoints: 2,
+				}
+			},
+			require: "$300",
+			can: computed(() => save.cash >= 300),
+			show: computed(() => save.state === 7),
+			finish: () => {
+				save.state++
+				save.cash -= 300
+				messages.push("You found a bunch of stuff that you could buy, but you'll need some money...")
+			}
+		},
+		{
+			name: "Leave",
+			desc: "Leave for another country",
+			time: 90,
+			show: computed(() => save.upgrades[21] >= 1 && save.state === 8),
+			start: () => {
+				if (save.puzzlesCompleted[1]) {
+					messages.push("You remembered your PIN code this time.")
+					solvePuzzle1()
+				} else {
+					puzzle1.attempted = true
+					puzzle1.code = randomInt(1000, 9999)
+				}
 			}
 		}
-	}]
+	]
 
 	const UPGRADES = [{
 			item: true,
@@ -459,7 +474,8 @@
 			cost: {
 				cash: 100,
 			},
-		}, {
+		},
+		{
 			name: "Job Bonus",
 			desc: "Use your experience on the job to get a bonus!",
 			flavorDesc: "Is this even a good idea?",
@@ -479,7 +495,8 @@
 					return 10 * Math.pow(4, save.upgrades[1])
 				})
 			},
-		}, {
+		},
+		{
 			item: true,
 			name: "Worn-out Matress",
 			desc: "It's at least better than sleeping on the floor.",
@@ -494,7 +511,8 @@
 		},
 		// the two upgrades removed
 		// I could remove these and fix the indexes but that takes too much work and could cause bugs
-		, , , , {
+		, , , ,
+		{
 			evasion: true,
 			name: "Sneaky",
 			desc: "Use your experience with the police to divide Evasion loss.",
@@ -510,7 +528,8 @@
 			},
 			eff: computed(() => Math.pow(2, save.upgrades[7])),
 			effDesc: x => `/${format(x)} to Evasion loss`
-		}, {
+		},
+		{
 			evasion: true,
 			name: "Sneakier",
 			desc: "Use your experience with the environment around you to increase the Evaded cap.",
@@ -526,7 +545,8 @@
 			},
 			eff: computed(() => 0.1 * save.upgrades[8]),
 			effDesc: x => `+${format(x * 100)}% to Evaded cap`
-		}, , , {
+		}, , ,
+		{
 			evasion: true,
 			name: "Speed",
 			desc: "Use your experience to increase Action speed.",
@@ -542,7 +562,8 @@
 			},
 			eff: computed(() => 1 + 0.5 * save.upgrades[11]),
 			effDesc: x => `${formatMult(x)} to Action speed`
-		}, {
+		},
+		{
 			item: true,
 			name: "New Mattress",
 			desc: "Much more comfortable than the previous one, making you more efficent.",
@@ -554,7 +575,8 @@
 			cost: {
 				cash: 1000
 			},
-		}, {
+		},
+		{
 			name: "Persuasion",
 			desc: "Convince other people to help you on your quest to escape jail.",
 			show: computed(() => save.upgrades[12] >= 1),
@@ -563,7 +585,8 @@
 				cash: 20000,
 				xp: 10000
 			},
-		}, {
+		},
+		{
 			corp: true,
 			name: "Convince",
 			desc: "Convince a person to help you.",
@@ -588,7 +611,8 @@
 					return Math.pow(1.2, eff * workers) * 2000
 				})
 			},
-		}, , {
+		}, ,
+		{
 			corp: true,
 			name: "Productivity",
 			desc: "All workers produce 20% more.",
@@ -602,7 +626,8 @@
 					return 5e4 * Math.pow(2.5, save.upgrades[16])
 				})
 			}
-		}, {
+		},
+		{
 			corp: true,
 			name: "Cheapism",
 			desc: "The cost for workers scales 5% slower.",
@@ -613,7 +638,8 @@
 					return 1e5 * Math.pow(5, save.upgrades[17])
 				}),
 			}
-		}, , , , {
+		}, , , ,
+		{
 			name: "Escape",
 			desc: "Buy plane tickets to flee to another country and unlock a new Action.",
 			show: computed(() => save.upgrades[13] >= 1),
@@ -621,7 +647,8 @@
 			cost: {
 				cash: 5e7
 			}
-		}, , {
+		}, ,
+		{
 			lawyer: true,
 			name: "Strategizing",
 			desc: "You have a lot of work, but you'll need good strategies...",
@@ -630,7 +657,8 @@
 			cost: {
 				work: YEAR * 20
 			},
-		}, {
+		},
+		{
 			lawyer: true,
 			name: "Thinking...",
 			desc: "Get one of your lawyers to try to come up with a strategy.",
@@ -641,7 +669,8 @@
 			},
 			eff: computed(() => save.upgrades[24]),
 			effDesc: x => `${format(x)} attempts/sec`
-		}, {
+		},
+		{
 			lawyer: true,
 			name: "Complexity",
 			desc: "Make more complicated strategies by increasing the max Strategy size by 1.",
@@ -650,7 +679,8 @@
 			cost: {
 				work: computed(() => YEAR * 1e6 * Math.pow(40, save.upgrades[25]))
 			}
-		}, {
+		},
+		{
 			lawyer: true,
 			name: "Efficency",
 			desc: "Use the work created to make auto-attempts 15% faster.",
@@ -659,7 +689,8 @@
 			cost: {
 				work: computed(() => YEAR * 1e4 * Math.pow(100, save.upgrades[26]))
 			}
-		}, {
+		},
+		{
 			lawyer: true,
 			name: "Speeeed",
 			desc: "Reduce the time required to reroll Strategies by 10%.",
@@ -668,7 +699,8 @@
 			cost: {
 				work: computed(() => YEAR * 1e3 * Math.pow(10, save.upgrades[27]))
 			}
-		}, , , , , , {
+		}, , , , , ,
+		{
 			name: "Candy bars",
 			desc: "Buy a candy bar from the prison shop.",
 			max: Infinity,
@@ -676,7 +708,8 @@
 				cash: computed(() => 0.2 * Math.pow(2, Math.floor(save.upgrades[33] / 10)))
 			},
 			show: computed(() => save.state >= 2 && save.state <= 5)
-		}, {
+		},
+		{
 			name: "Shovel",
 			desc: "Buy a shovel to help you find more junk.",
 			max: Infinity,
@@ -684,7 +717,8 @@
 			cost: {
 				cash: computed(() => 0.5 + 0.1 * Math.pow(save.upgrades[34], 2))
 			}
-		}, {
+		},
+		{
 			name: "Toolmaking",
 			desc: "Make some tools using junk, which should help improve your Work quality.",
 			max: Infinity,
@@ -692,7 +726,8 @@
 			cost: {
 				junk: computed(() => 10 + 2 * Math.pow(save.upgrades[35], 2))
 			}
-		}, {
+		},
+		{
 			research: true,
 			name: "Jars",
 			desc: "Use jars to preserve food.",
@@ -706,7 +741,8 @@
 			cost: {
 				junk: computed(() => 40 * Math.pow(1.5, save.upgrades[36])),
 			}
-		}, {
+		},
+		{
 			research: true,
 			name: "Efficency",
 			desc: "Buy a book on the secrets of doing more in less time.",
@@ -720,7 +756,8 @@
 			cost: {
 				cash: computed(() => Math.pow(4, save.upgrades[37])),
 			}
-		}, , {
+		}, ,
+		{
 			name: "Bribery",
 			desc: "Bribe police so they won't be after you as much.",
 			max: Infinity,
@@ -731,7 +768,8 @@
 			cost: {
 				cash: computed(() => 100 * Math.pow(8, save.upgrades[39]))
 			}
-		}, {
+		},
+		{
 			research: true,
 			name: "Metal Detectors",
 			desc: "Repair some metal detectors that you found to get more junk.",
@@ -744,7 +782,8 @@
 				experience: computed(() => 3 * Math.pow(10, save.upgrades[40])),
 				junk: computed(() => 50 * Math.pow(4, save.upgrades[40]))
 			}
-		}, {
+		},
+		{
 			research: true,
 			name: "Experienced",
 			desc: "Use your experience to get more experience!",
@@ -756,7 +795,8 @@
 			cost: {
 				xp: computed(() => 500 * Math.pow(7, save.upgrades[41])),
 			}
-		}, {
+		},
+		{
 			name: "Learning",
 			desc: "Use your experience to gain extra cash.",
 			max: Infinity,
@@ -767,7 +807,8 @@
 			cost: {
 				xp: computed(() => 100 * Math.pow(4, save.upgrades[42])),
 			}
-		}, {
+		},
+		{
 			research: true,
 			name: "Automated",
 			desc: "Use your experience managing workers to get jobs done automatically, unlocking auto-Actions and auto-Upgrades.",
@@ -777,7 +818,8 @@
 				cash: 2e5,
 				xp: 2e5
 			}
-		}, {
+		},
+		{
 			corp: true,
 			name: "Multiplicative",
 			desc: "Each worker gives +1% to worker production per level of this upgrade.",
@@ -786,7 +828,8 @@
 			cost: {
 				xp: computed(() => 1e6 * Math.pow(10, save.upgrades[44])),
 			}
-		}, {
+		},
+		{
 			research: true,
 			name: "Productivity^2",
 			desc: "Entice workers to be 15% more productive, again.",
@@ -797,7 +840,8 @@
 				xp: computed(() => 50000 * Math.pow(3, save.upgrades[45])),
 				experience: computed(() => 10000 * Math.pow(2, save.upgrades[45]))
 			}
-		}, {
+		},
+		{
 			research: true,
 			name: "Energized",
 			desc: "Increase the Energy cap by 40.",
@@ -806,7 +850,8 @@
 			cost: {
 				cash: computed(() => 1e5 * Math.pow(3, save.upgrades[46]))
 			}
-		}, {
+		},
+		{
 			research: true,
 			name: "Work Experience",
 			desc: "Use your experience to triple work gain.",
@@ -826,7 +871,8 @@
 			cost: {
 				strategies: computed(() => 5 * Math.pow(10, save.upgrades[48]))
 			}
-		}, {
+		},
+		{
 			research: true,
 			name: "Restart",
 			desc: "Automatically reroll Strategies if there are no more nodes left to be searched.",
@@ -835,7 +881,8 @@
 			cost: {
 				strategies: 5000
 			}
-		}, , {
+		}, ,
+		{
 			research: true,
 			name: "Better Strategies",
 			desc: "Use your work to make better strategies.",
@@ -847,7 +894,8 @@
 			cost: {
 				work: computed(() => YEAR * 1e4 * Math.pow(100, save.upgrades[51]))
 			}
-		}, {
+		},
+		{
 			research: true,
 			name: "Automatic Lawyers",
 			desc: "Automatically hire lawyers. Can be configured in the Lawyers subtab.",
@@ -860,18 +908,22 @@
 	]
 
 	const LAWYER_TIERS = [{
-		name: "Lawyer",
-		cost: computed(() => 2e7 * Math.pow(1.5, save.lawyers[0].bought)),
-	}, {
-		name: "Assistant",
-		cost: computed(() => 1e9 * Math.pow(2, save.lawyers[1].bought))
-	}, {
-		name: "Attorney",
-		cost: computed(() => 1e10 * Math.pow(2.5, save.lawyers[2].bought)),
-	}, {
-		name: "Judge",
-		cost: computed(() => 3e11 * Math.pow(3, save.lawyers[3].bought)),
-	}]
+			name: "Lawyer",
+			cost: computed(() => 2e7 * Math.pow(1.5, save.lawyers[0].bought)),
+		},
+		{
+			name: "Assistant",
+			cost: computed(() => 1e9 * Math.pow(2, save.lawyers[1].bought))
+		},
+		{
+			name: "Attorney",
+			cost: computed(() => 1e10 * Math.pow(2.5, save.lawyers[2].bought)),
+		},
+		{
+			name: "Judge",
+			cost: computed(() => 3e11 * Math.pow(3, save.lawyers[3].bought)),
+		}
+	]
 
 	function getLawyerMulti(idx) {
 		let multi = 1
@@ -961,8 +1013,8 @@
 
 				// Technically it's possible for there to be two instances of the same node
 				// but I don't really care
-				(paths[i] ? ? (paths[i] = [])).push(id);
-				(paths[id] ? ? (paths[id] = [])).push(i)
+				(paths[i] ?? (paths[i] = [])).push(id);
+				(paths[id] ?? (paths[id] = [])).push(i)
 			}
 		}
 
@@ -1022,7 +1074,7 @@
 			(upg.corp && save.upgrades[13] === 0) ||
 			(upg.item && save.state < 8) ||
 			(upg.lawyer && save.state < 9) ||
-			!(upg.can ? .value ? ? true) ||
+			!(upg.can?.value ?? true) ||
 			!upg.show.value ||
 			save.upgrades[id] >= upg.max
 		) return false
@@ -1036,13 +1088,13 @@
 
 	function canRunAction(id) {
 		const action = ACTIONS[id]
-		if (action.mods ? .sec) {
+		if (action.mods?.sec) {
 			for (const [mod, value] of Object.entries(action.mods.sec)) {
 				if (unref(value) < 0 && save[mod] <= 0) return false
 			}
 		}
 
-		return (action.can ? .value ? ? true) && (action.active ? .value ? ? true) && action.show.value
+		return (action.can?.value ?? true) && (action.active?.value ?? true) && action.show.value
 	}
 
 	function buyUpgrade(id) {
@@ -1113,7 +1165,7 @@
 		gen *= Math.pow(2, Math.floor(d / 30))
 
 		gen /= Math.pow(2, save.upgrades[39])
-		gen *= unref(ACTIONS[selected.value] ? .mods ? .mult ? .evasionPoints) ? ? 1
+		gen *= unref(ACTIONS[selected.value]?.mods?.mult?.evasionPoints) ?? 1
 		gen /= UPGRADES[7].eff.value
 		gen *= cashPenalty.value
 		return gen
@@ -1143,8 +1195,8 @@
 
 	const passiveCash = computed(() => {
 		let cash = 0
-		cash += unref(ACTIONS[selected.value] ? .mods ? .sec ? .cash) ? ? 0
-		cash *= unref(ACTIONS[selected.value] ? .mods ? .mult ? .cash) ? ? 1
+		cash += unref(ACTIONS[selected.value]?.mods?.sec?.cash) ?? 0
+		cash *= unref(ACTIONS[selected.value]?.mods?.mult?.cash) ?? 1
 		cash += save.upgrades[14] * workerProds.value.cash
 		cash *= selfBoost.value
 		cash *= Math.pow(1.25, save.upgrades[42])
@@ -1159,7 +1211,7 @@
 
 	const passiveXP = computed(() => {
 		let xp = 0
-		xp += unref(ACTIONS[selected.value] ? .mods ? .sec ? .xp) ? ? 0
+		xp += unref(ACTIONS[selected.value]?.mods?.sec?.xp) ?? 0
 		xp += save.upgrades[14] * workerProds.value.xp
 		xp *= selfBoost.value
 		return xp
@@ -1167,8 +1219,8 @@
 
 	const passiveEnergy = computed(() => {
 		let energy = 0
-		energy += unref(ACTIONS[selected.value] ? .mods ? .sec ? .energy) ? ? 0
-		energy *= unref(ACTIONS[selected.value] ? .mods ? .mult ? .energy) ? ? 1
+		energy += unref(ACTIONS[selected.value]?.mods?.sec?.energy) ?? 0
+		energy *= unref(ACTIONS[selected.value]?.mods?.mult?.energy) ?? 1
 		return energy
 	})
 
@@ -1259,17 +1311,17 @@
 					const action = ACTIONS[selected.value]
 
 					let okay = true
-					for (const [mod, value] of Object.entries(action.mods ? .sec ? ? {})) {
+					for (const [mod, value] of Object.entries(action.mods?.sec ?? {})) {
 						if (unref(value) < 0 && save[mod] <= 0) okay = false
 					}
 
-					if (!(action.active ? .value ? ? true) || !okay) {
+					if (!(action.active?.value ?? true) || !okay) {
 						selected.value = -1
 					} else {
 						actionState[selected.value] = Math.min(actionState[selected.value] + actionSpeed.value * diff, action.time)
 
 						if (actionState[selected.value] >= action.time) {
-							action.finish ? .()
+							action.finish?.()
 							actionState[selected.value] = 0
 							selected.value = -1
 						}
@@ -1279,7 +1331,7 @@
 					for (let i = ACTIONS.length - 1; i >= 0; i--) {
 						if (save.auto.actions[i] && canRunAction(i)) {
 							selected.value = i;
-							ACTIONS[i].start ? .()
+							ACTIONS[i].start?.()
 							break;
 						}
 					}
@@ -1354,7 +1406,7 @@
 
 									// Find all other nodes that haven't already been searched
 									// Reverse otherwise it looks at them in the opposite order
-									for (const next of (strategyTemp.map[node] ? ? []).toReversed()) {
+									for (const next of (strategyTemp.map[node] ?? []).toReversed()) {
 										if (!searched.has(next) && !stack.includes(next)) stack.push(next)
 									}
 								}
@@ -1559,7 +1611,7 @@
 			const can = computed(() => canRunAction(props.id))
 
 			const need = computed(() => {
-				if (action.mods ? .sec) {
+				if (action.mods?.sec) {
 					for (const [mod, value] of Object.entries(action.mods.sec)) {
 						if (unref(value) < 0 && save[mod] <= 0) return mod
 					}
@@ -1591,7 +1643,7 @@
 				click: () => {
 					if (!can.value || otherStarted.value) return
 					selected.value = props.id
-					action.start ? .()
+					action.start?.()
 				}
 			}
 		},
@@ -2109,7 +2161,7 @@
 		setup() {
 			const comp = ref(null)
 			watch(messages, () => {
-				comp.value ? .lastElementChild ? .scrollIntoView(false, {
+				comp.value?.lastElementChild?.scrollIntoView(false, {
 					behavior: "smooth"
 				})
 			}, {
@@ -2159,7 +2211,7 @@
 	const StrategyGrid = {
 		setup() {
 			function isConnected(i) {
-				return strategyTemp.map[strategyTemp.selected] ? .includes(i) ? ? false
+				return strategyTemp.map[strategyTemp.selected]?.includes(i) ?? false
 			}
 
 			function handleClick(i) {
