@@ -1,4 +1,10 @@
-html, body, #loading, #app, #escape, #game, #end {
+html,
+body,
+#loading,
+#app,
+#escape,
+#game,
+#end {
 	height: 100%;
 }
 
@@ -43,8 +49,8 @@ button:hover {
 }
 
 .tabs {
-	 display: flex; 
-	 justify-content: center;
+	display: flex;
+	justify-content: center;
 }
 
 #game {
@@ -112,7 +118,8 @@ button:hover {
 	transform: scale(1.1);
 }
 
-.cant:not(:has(.auto)), .cant:has(.auto) > *:not(.auto) {
+.cant:not(:has(.auto)),
+.cant:has(.auto)>*:not(.auto) {
 	cursor: default;
 	opacity: 0.3;
 }
@@ -153,51 +160,51 @@ button:hover {
 }
 
 .spacey {
-	display: flex; 
-	font-weight: bold; 
-	justify-content: space-between; 
+	display: flex;
+	font-weight: bold;
+	justify-content: space-between;
 	margin-bottom: 0.3rem;
 }
 
 .progress {
-	position: absolute; 
-	top: 0; 
+	position: absolute;
+	top: 0;
 	left: 0;
-	height: 100%; 
+	height: 100%;
 	z-index: -999;
 }
 
 .tooltip-div {
-  position: absolute;
-  z-index: 2;
+	position: absolute;
+	z-index: 2;
 
-  min-width: 1.5rem;
-  max-width: 20rem;
-  min-height: 0.6rem;
-  padding: 0.3rem 0.6rem;
+	min-width: 1.5rem;
+	max-width: 20rem;
+	min-height: 0.6rem;
+	padding: 0.3rem 0.6rem;
 
-  border: solid 0.1rem #444;
-  border-radius: 0.6rem;
+	border: solid 0.1rem #444;
+	border-radius: 0.6rem;
 
-  color: black;
+	color: black;
 	background-color: white;
-  text-align: center;
+	text-align: center;
 
-  pointer-events: none;
+	pointer-events: none;
 }
 
 .popup {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
 	background-color: white;
 	color: black;
-  border: solid 0.15rem black;
-  padding: 0.5rem 2rem;
-  pointer-events: auto;
-  max-width: 35rem;
-  max-height: 30rem;
+	border: solid 0.15rem black;
+	padding: 0.5rem 2rem;
+	pointer-events: auto;
+	max-width: 35rem;
+	max-height: 30rem;
 }
 
 .line {
@@ -227,15 +234,15 @@ input[type="range"] {
 }
 
 #puzzle0 {
-	position: relative; 
-	width: 100%; 
-	height: 2rem; 
+	position: relative;
+	width: 100%;
+	height: 2rem;
 	border: 0.1rem solid black
 }
 
 #puzzle0 div {
 	position: absolute;
-	top: 0; 
+	top: 0;
 	height: 2rem;
 }
 
@@ -250,13 +257,13 @@ line {
 }
 
 *::-webkit-scrollbar {
-    width: 0.7rem;
-		height: 0.7rem;
+	width: 0.7rem;
+	height: 0.7rem;
 }
 
 *::-webkit-scrollbar-thumb {
-    background-color: blue;
-    border-radius: 0.5rem;
+	background-color: blue;
+	border-radius: 0.5rem;
 }
 
 .evidence {
