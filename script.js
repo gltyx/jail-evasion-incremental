@@ -1371,6 +1371,7 @@
 		})
 		selected.value = -1
 		for (let i = 0; i < ACTIONS.length; i++) actionState[i] = 0
+		generateMap()
 	}
 
 	const paused = ref(DEV)
