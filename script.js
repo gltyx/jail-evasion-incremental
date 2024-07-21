@@ -1136,7 +1136,8 @@
 
 	const FORMATTER = {
 		cash: (x, m) => m ? "$" + x : x + " Cash",
-		evasionPoints: x => x + " Evasion",
+		// I don't think anything of significance relies on this being Evasion?
+		evasionPoints: x => x + " Evasion Loss",
 		xp: x => x + " XP",
 		energy: x => x + " Energy",
 		experience: x => x + " Experience",
