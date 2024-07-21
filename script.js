@@ -571,7 +571,7 @@
 			name: "New Mattress",
 			desc: "Much more comfortable than the previous one, making you more efficent.",
 			effects: {
-				good: [formatMult(2, 0) + " to productivity"],
+				good: [formatMult(2, 0) + " to productivity", formatMult(3, 0) + " to Work speed"],
 			},
 			show: computed(() => true),
 			max: 1,
@@ -2311,7 +2311,7 @@
 
 			function handleClick(i) {
 				if (isConnected(i - 1)) strategyTemp.selected = i - 1
-				if (i === strategyTemp.map.size ** 2) {
+				if (strategyTemp.selected + 1 === strategyTemp.map.size ** 2) {
 					generateMap()
 					save.strategies += strategyGain.value
 				}
@@ -2554,11 +2554,7 @@
 				<button @click="change(-1)" :class="save.strategySize > 5 ? 'can' : 'cant'">&larr;</button>
 				{{ save.strategySize }}
 				<button @click="change(1)" :class="save.strategySize < strategyData.size ? 'can' : 'cant'">&rarr;</button><br />
-			<StrategyGrid v-if="strategy.map.size < 10" />
-			<div v-else>
-				Due to sheer laziness, you can no longer see the Strategy, but you will still gain strategies as normal.<br />
-				Progress: {{ strategy.auto.searched.size }} / {{ strategy.map.size ** 2 }} ({{ format(strategy.auto.searched.size / strategy.map.size ** 2 * 100) }}% done)
-			</div>
+			<StrategyGrid />
 		</template>
 		<Trial v-if="tab === 'trial'" />
 		</div>`
