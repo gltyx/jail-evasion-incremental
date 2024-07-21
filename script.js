@@ -1995,11 +1995,12 @@
 			}
 
 			function listener(e) {
-				if (e.key === " ") pry()
+				// Needed because the component is never unmounted
+				const doStuff = puzzle0.attempted || exit.value
+				if (e.key === " " && doStuff) pry()
 			}
 
 			window.addEventListener("keypress", listener)
-			onUnmounted(() => window.removeEventListener("keypress", listener))
 
 			return {
 				puzzle0,
@@ -2057,11 +2058,11 @@
 			}
 
 			function listener(e) {
-				if (e.key === "Enter") submitGuess()
+				// Same as above
+				if (e.key === "Enter" && puzzle1.attempted) submitGuess()
 			}
 
 			window.addEventListener("keypress", listener)
-			onUnmounted(() => window.removeEventListener("keypress", listener))
 
 			return {
 				guess,
