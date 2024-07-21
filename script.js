@@ -2715,6 +2715,6 @@
 		autoSave()
 
 		// Always make true for now just in case the bugs happen
-		if (true && DEV) window.save = save
+		if (true || DEV) window.save = save
 	})
 })()
