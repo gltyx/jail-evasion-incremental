@@ -532,9 +532,12 @@
 		{
 			evasion: true,
 			name: "Sneakier",
-			desc: "Use your experience with the environment around you to increase the Evaded cap.",
+			desc: "Use your experience with the environment around you to increase the Evasion cap.",
 			effects: {
-				good: ["+10% to Evaded cap"],
+				good: [computed(() => {
+					const mult = Math.pow(1 + 0.1 / (1 + 0.1 * save.upgrades[8]), 4)
+					return `${formatMult(mult)} to Evasion cap`
+				})],
 			},
 			show: computed(() => true),
 			max: Infinity,
@@ -544,7 +547,7 @@
 				}),
 			},
 			eff: computed(() => 0.1 * save.upgrades[8]),
-			effDesc: x => `+${format(x * 100)}% to Evaded cap`
+			effDesc: x => formatMult(Math.pow(1 + x, 4))
 		}, , ,
 		{
 			evasion: true,
@@ -830,7 +833,7 @@
 				junk: computed(() => 50 * Math.pow(4, save.upgrades[40]))
 			},
 			eff: computed(() => Math.pow(1.2, save.upgrades[40])),
-			effDesc: x => `/${format(x)}`
+			effDesc: x => formatMult(x)
 		},
 		{
 			research: true,
@@ -1871,7 +1874,7 @@
 						<div class="center" style="height: 100%">
 						<div>
 							{{ format(points) }} (-{{ format(gen) }}/sec) Evasion<br />
-							{{ format(evasion * 100) }}% / {{ format(cap * 100) }}% Evaded
+							{{ format(evasion * 100) }}% / {{ format(cap * 100) }}%
 							</div>
 						</div>
 					</div>
