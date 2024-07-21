@@ -1318,9 +1318,11 @@
 		let base = save.meals * 100 + save.upgrades[33] * 20
 		base *= UPGRADES[36].eff.value
 
-		// softcap beyond 2000 and 5000
-		if (base > 2000) base = 2000 + (base - 2000) / 5
-		if (base > 5000) base = 5000 + (base - 5000) / 10
+		// softcap beyond 2000 and 5000 but only after you reset once to stop softlock
+		if (save.resetTimes > 0) {
+			if (base > 2000) base = 2000 + (base - 2000) / 5
+			if (base > 5000) base = 5000 + (base - 5000) / 10
+		}
 		return base
 	})
 
@@ -1917,7 +1919,7 @@
 				<template #tooltip>
 					Energy that you can gain through resting, increased by the amount of food you have. 
 					You have {{ format(save.meals, 0) }} meals, and {{ format(save.upgrades[33], 0) }} candy bars.
-					Total energy will be reduced past 2000 and 5000.
+					{{ save.resetTimes > 0 ? "Total energy will be reduced past 2000 and 5000." : "" }}
 				</template>
 			</Tooltip>
 			<Tooltip pos="right" tooltip-align="center" text-align="center">
