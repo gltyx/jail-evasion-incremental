@@ -1,0 +1,66 @@
+theme: EVASION
+
+plan:
+you were sent to jail and you are trying to escape from jail
+
+you want to avoid being sent to jail again, so you try to escape
+every second, there's a chance that you will be sent to jail
+you can try to increase your distance from the jail, and earn cash
+cash can be used to avoid getting spotted and sent to jail
+however, there can be tradeoffs between earning more cash and decreasing search effort,
+as some opportunities can increase search effort but earn more cash
+eventually, you can book an international flight and escape to another country
+some puzzles will be included to make it more challenging
+
+at the end, you can hire lawyers and countersue, leading to pernament escape from jail
+the game ends after that
+
+okay some more detailed ideas:
+
+in the jail:
+want to explore the jail, find exits, and solve a puzzle to exit the jail
+
+outside of the jail: you try to escape for as long as possible
+you try to look for cash, such as scavenging for cash
+eventually, you get enough money such that you can leave the jail place on some vehicle
+you're at the city, evasion gain increases and you need to find a place to stay
+you can also work for money, although evasion gain increases while you work and after you work
+
+you think and get ideas and boost progress
+you also can buy stuff that can increase productivity
+you also unlock motivation, which is a global boost to all positive effects and a reduction to evasion
+
+eventually you get an idea for a business, which lets you gain money and XP passively, but it
+also increases evasion gain massively
+you can hire employees, and managers, and also buy upgrades to increase profits (generally), reduce the business
+impact on evasion
+you can also buy an upgrade increasing profits, but that comes at a cost of evasion multiplier
+
+you can also hire a CEO, which also takes money passively, reducing furthermore the business impact on evasion
+you can eventually unlock the option to buy a plane ticket and board a plane to head to another country, reducing evasion gain
+and unlocking more features
+
+boarding a plane requires you to solve a puzzle, which will be a graph linking nodes from the start, to intermediate nodes, to the exit
+you have to travel through the intermediate nodes to reach the exit, but you can also reroll and reset your graph in case you need it (but they have cooldowns)
+
+at the plane landing: unlock business marketing (because there's no market for product there)
+at least add a paradigm shift to keep it novel
+hire more employees, upgrades for marketing (but it increases evasion loss because of popularity), etc.
+
+finally, at some amount of money, unlock lawyers
+lawyers will help you contest your jail sentence
+also unlock "lawyer dimensions" with each dimension being a higher tier on the judicial scale (US)
+laywers also cost passive money, and generate "hours of work"
+
+at a high enough "hours of work", "go to trial", which starts the end of the game
+play another puzzle to help your lawyers obtain enough evidence to win (idk what yet)
+after winning the trial, end the game with some type of modal saying you sucessfully contested your jail sentence
+and is finally out of jail pernamently
+maybe add some cute animation or whatnot
+
+some safeguards:
+in case evasion reaches 0, reset the entire game but give a currency that can be spent on bonuses for the next run (don't make it required)
+at certain evaded points, unlock upgrades that reduce evasion loss past the evaded percentages
+ALSO POLISH UI
+
+AND ONCE AGAIN POLISH UI BECAUSE IT. SUCKS. ASS!!!!!!!!!!
